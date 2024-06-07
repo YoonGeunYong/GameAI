@@ -1,59 +1,72 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "ParentsCharacter.h"
+#include "ChaserCharacter.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
-AParentsCharacter::AParentsCharacter()
+AChaserCharacter::AChaserCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	PatrolRadius = 500.0f;
-	DetectionRadius = 1000.0f;
-
+    PatrolRadius = 500.0f;
+    DetectionRadius = 1000.0f;
+    CurrentState = EChaserState::Patrol;
 }
 
 // Called when the game starts or when spawned
-void AParentsCharacter::BeginPlay()
+void AChaserCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+    Patrol();
 	
 }
 
 // Called every frame
-void AParentsCharacter::Tick(float DeltaTime)
+void AChaserCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-    if (DetectedRunner)
+    switch (CurrentState)
     {
-        Chase(DetectedRunner);
-    }
-    else
-    {
+    case EChaserState::Patrol:
+        Patrol();
         if (DetectRunner())
         {
-            DetectedRunner = UGameplayStatics::GetPlayerPawn(GetWorld(), 0); // Assuming runner is the player
+            SetState(EChaserState::Chase);
+        }
+        break;
+
+    case EChaserState::Chase:
+        if (DetectedRunner)
+        {
+            Chase(DetectedRunner);
+            if (FVector::Dist(GetActorLocation(), DetectedRunner->GetActorLocation()) > DetectionRadius)
+            {
+                SetState(EChaserState::Patrol);
+            }
         }
         else
         {
-            Patrol();
+            SetState(EChaserState::Patrol);
         }
-    }
+        break;
 
+    default:
+        break;
+    }
 }
 
 // Called to bind functionality to input
-void AParentsCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AChaserCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
 
-void AParentsCharacter::Patrol()
+void AChaserCharacter::Patrol()
 {
     if (PatrolPoints.Num() > 0)
     {
@@ -66,20 +79,34 @@ void AParentsCharacter::Patrol()
     }
 }
 
-void AParentsCharacter::Chase(AActor* Runner)
+void AChaserCharacter::Chase(AActor* Runner)
 {
     FVector Direction = (Runner->GetActorLocation() - GetActorLocation()).GetSafeNormal();
     AddMovementInput(Direction);
 }
 
-bool AParentsCharacter::DetectRunner()
+bool AChaserCharacter::DetectRunner()
 {
     AActor* Runner = UGameplayStatics::GetPlayerPawn(GetWorld(), 0); // Assuming runner is the player
     if (Runner)
     {
         float DistanceToRunner = FVector::Dist(GetActorLocation(), Runner->GetActorLocation());
-        return DistanceToRunner <= DetectionRadius;
+        if (DistanceToRunner <= DetectionRadius)
+        {
+            DetectedRunner = Runner;
+            return true;
+        }
     }
+    DetectedRunner = nullptr;
     return false;
+}
+
+void AChaserCharacter::SetState(EChaserState NewState)
+{
+    CurrentState = NewState;
+    if (NewState == EChaserState::Patrol)
+    {
+        CurrentPatrolPoint = nullptr;
+    }
 }
 

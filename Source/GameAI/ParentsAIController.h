@@ -13,5 +13,13 @@ UCLASS()
 class GAMEAI_API AParentsAIController : public AAIController
 {
 	GENERATED_BODY()
+
+public:
+	virtual void Tick(float DeltaSeconds) override;
+
+protected:
+	virtual void BeginPlay() override;
 	
+private:
+	FVector FugitiveLocation;
 };

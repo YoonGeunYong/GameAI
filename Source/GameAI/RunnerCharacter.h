@@ -4,16 +4,23 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "ParentsCharacter.generated.h"
+#include "RunnerCharacter.generated.h"
+
+UENUM(BlueprintType)
+enum class ERunnerState : uint8
+{
+	Idle      UMETA(DisplayName = "Idle"),
+	RunAway   UMETA(DisplayName = "RunAway")
+};
 
 UCLASS()
-class GAMEAI_API AParentsCharacter : public ACharacter
+class GAMEAI_API ARunnerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
-	AParentsCharacter();
+	ARunnerCharacter();
 
 protected:
 	// Called when the game starts or when spawned
@@ -25,21 +32,12 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
-	UPROPERTY(EditAnywhere, Category = "AI")
-	float PatrolRadius;
 
-	UPROPERTY(EditAnywhere, Category = "AI")
-	float DetectionRadius;
-
-	UPROPERTY(EditAnywhere, Category = "AI")
-	TArray<AActor*> PatrolPoints;
+	float EscapeDistance;
 
 private:
-	AActor* CurrentPatrolPoint;
-	AActor* DetectedRunner;
+	ERunnerState CurrentState;
+	void SetState(ERunnerState NewState);
 
-	void Patrol();
-	void Chase(AActor* Runner);
-	bool DetectRunner();
+	void Escape();
 };
