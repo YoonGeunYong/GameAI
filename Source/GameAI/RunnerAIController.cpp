@@ -23,6 +23,7 @@ void ARunnerAIController::BeginPlay()
     HideEndLocation = GetPawn()->GetActorLocation() + FVector(1100.0f, 1100.0f, 0.0f);
     Chaser = UGameplayStatics::GetActorOfClass(GetWorld(), AChaserCharacter::StaticClass());
     SetState(ERunnerState::Idle);
+    UE_LOG(LogTemp, Warning, TEXT("[Runner] StartState : Idle"));
 }
 
 void ARunnerAIController::Tick(float DeltaTime)
@@ -41,10 +42,12 @@ void ARunnerAIController::Tick(float DeltaTime)
         if (Dist > 300.0f)
         {
             SetState(ERunnerState::Hiding);
+            UE_LOG(LogTemp, Warning, TEXT("[Runner] RunAway -> Hiding --Wait 10s"));
         }
         else if (Dist <= 150)
         {
             SetState(ERunnerState::Caught);
+            UE_LOG(LogTemp, Warning, TEXT("[Runner] RunAway -> Caught"));
         }
         break;
 
@@ -55,6 +58,7 @@ void ARunnerAIController::Tick(float DeltaTime)
         if (HideTime > MaxHideTime)
         {
             SetState(ERunnerState::Idle);
+            UE_LOG(LogTemp, Warning, TEXT("[Runner] Hiding -> Idle"));
         }
         break;
 
@@ -99,9 +103,9 @@ void ARunnerAIController::Escape()
         if (!AllowedArea.IsInside(DestinationLocation))
         {
             // 범위 밖이라면, 추적자 방향과 범위 경계 사이 지점으로 도망
-            UE_LOG(LogTemp, Warning, TEXT("RunAway"));
-            FVector RunawayDirection = FVector::CrossProduct(AwayDirection, AllowedArea.GetClosestPointTo(DestinationLocation) - GetPawn()->GetActorLocation()).GetSafeNormal();
-            DestinationLocation = GetPawn()->GetActorLocation() + RunawayDirection * 700;
+            FVector RunawayDirection = FVector::CrossProduct(AwayDirection, 
+                AllowedArea.GetClosestPointTo(DestinationLocation) - GetPawn()->GetActorLocation()).GetSafeNormal();
+            DestinationLocation = GetPawn()->GetActorLocation() + RunawayDirection * 500;
         }
         MoveToLocation(DestinationLocation, 5.0f);
     }

@@ -46,5 +46,4 @@ private:
     void Escape();
     void Hide();
     void CheckDistanceToChaser();
-
 };

@@ -48,5 +48,4 @@ private:
     void Chase(AActor* Runner);
     void Search();
     void SetState(EChaserState NewState);
-	
 };

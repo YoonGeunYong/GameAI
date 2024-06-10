@@ -24,6 +24,7 @@ void AChaserAIController::BeginPlay()
     RunnerAIController = Cast<ARunnerAIController>(
         Cast<ACharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), ARunnerCharacter::StaticClass()))->GetController());
     SetState(EChaserState::Patrol);
+    UE_LOG(LogTemp, Warning, TEXT("[Chaser] StartState : Patrol"));
 }
 
 void AChaserAIController::Tick(float DeltaTime)
@@ -37,6 +38,7 @@ void AChaserAIController::Tick(float DeltaTime)
         if (DetectRunner())
         {
             SetState(EChaserState::Chase);
+            UE_LOG(LogTemp, Warning, TEXT("[Chaser] Patrol -> Chase"));
         }
         break;
 
@@ -49,35 +51,35 @@ void AChaserAIController::Tick(float DeltaTime)
             {
                 LastRunnerLocation = DetectedRunner->GetActorLocation();
                 SetState(EChaserState::Searching);
+                UE_LOG(LogTemp, Warning, TEXT("[Chaser] Chase -> Searching -- Serching Around 5s"));
             }
             else if (Distance < 150.0f)
             {
                 SetState(EChaserState::Catch);
+                UE_LOG(LogTemp, Warning, TEXT("[Chaser] Chase -> Catch"));
             }
         }
         else
         {
             SetState(EChaserState::Searching);
+            UE_LOG(LogTemp, Warning, TEXT("[Chaser] Chase -> Searching -- Serching Around 5s"));
         }
         break;
 
     case EChaserState::Searching:
         Search();
         SearchTime += DeltaTime;
-        if (SearchTime > MaxSearchTime)
+        if (SearchTime > MaxSearchTime || DetectRunner())
         {
             SetState(EChaserState::Patrol);
-        }
-        else if (DetectRunner())
-        {
-            SetState(EChaserState::Chase);
+            UE_LOG(LogTemp, Warning, TEXT("[Chaser] Searching -> Patrol"));
         }
         break;
 
     case EChaserState::Catch:
         if (!End)
         {
-            UE_LOG(LogTemp, Display, TEXT("Catch Runner"));
+            UE_LOG(LogTemp, Warning, TEXT("Catch Runner"));
             End = true;
         }
 
@@ -130,6 +132,7 @@ bool AChaserAIController::DetectRunner()
     {
         DetectedRunner = FoundRunner;
         RunnerAIController->SetState(ERunnerState::RunAway);
+        UE_LOG(LogTemp, Warning, TEXT("[Runner] Idle,Hiding -> RunAway"));
         return true;
     }
 
