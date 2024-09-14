@@ -1,7 +1,7 @@
-# 2023-2 Capstone
+# 2024-1 GameAI
 
-- #### Project : *Tail Guardians*
-- #### Duration : *2024.06.01* ~
+- #### Project : *Unreal AI*
+- #### Duration : *2024.06.06* ~ *2024.06.10*
 - #### Genre : *aaa*
 
 
